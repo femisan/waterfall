@@ -15,6 +15,7 @@ function connectWebSocket(spectrum) {
         console.log("error: " + evt.message);
     }
     ws.onmessage = function (evt) {
+        // console.log(evt);
         var data = JSON.parse(evt.data);
         if (data.s) {
             spectrum.addData(data.s);
@@ -33,7 +34,7 @@ function main() {
     // Create spectrum object on canvas with ID "waterfall"
     var spectrum = new Spectrum(
         "waterfall", {
-            spectrumPercent: 20
+            spectrumPercent: 30
     });
 
     // Connect to websocket

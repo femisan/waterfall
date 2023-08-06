@@ -144,7 +144,8 @@ Spectrum.prototype.updateAxes = function() {
 
     this.ctx_axes.textAlign = "left";
     var step = 10;
-    for (var i = this.min_db + 10; i <= this.max_db - 10; i += step) {
+    var step_db =  Math.floor((this.max_db - this.min_db)/step);
+    for (var i = this.min_db; i <= this.max_db; i += step_db) {
         var y = height - this.squeeze(i, 0, height);
         this.ctx_axes.fillText(i, 5, y);
 
@@ -395,8 +396,8 @@ function Spectrum(id, options) {
     // Setup state
     this.paused = false;
     this.fullscreen = false;
-    this.min_db = -120;
-    this.max_db = -20;
+    this.min_db = 0;
+    this.max_db = 80000;
     this.spectrumHeight = 0;
 
     // Colors
