@@ -148,6 +148,8 @@
   width: 7.5rem;
   height: 2.5rem;
   border: solid 0.063rem #444444;
+  color: #ffffff;
+  text-align: right;
 }
 .font_3 {
   font-size: 1rem;
@@ -163,6 +165,13 @@
 .text_5 {
   margin-right: 0.5rem;
 }
+.section_control {
+  padding: 1.63rem 1.5rem;
+  background-color: #222222;
+  border-top: solid 0.063rem #9f9e9e1a;
+  border-bottom: solid 0.063rem #9f9e9e1a;
+}
+
 .section_3 {
   padding: 1.63rem 1.5rem;
   background-color: #222222;
@@ -201,6 +210,7 @@
   border-radius: 0.38rem;
   overflow: hidden;
   width: 22rem;
+  color: #ffffff;
 }
 .group_4 {
   padding-top: 1.5rem;
