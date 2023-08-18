@@ -1,16 +1,82 @@
+
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta name="author" content="Jeppe Ledet-Pedersen">
-        <title>Spectrum Plot</title>
-        <link rel="stylesheet" type="text/css" href="style.css" />
-    </head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HealthVision</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <link rel="stylesheet" type="text/css" href="Frame_3.css" />
+  </head>
+  <body>
+    <div class="flex-col page">
+      <div class="flex-row header">
+        <div class="flex-row justify-between items-center flex-auto section">
+          <span class="font_1 text">Title 01</span>
+          <div class="flex-row items-center group space-x-21">
+            <img class="image" src="imgs/83f41e7b401d792d28497d0dfa4fe164.png" />
+            <img class="image_2" src="imgs/27b9516a5b295b04390158337de7451b.png" />
+          </div>
+        </div>
+        <div class="flex-col justify-start items-start shrink-0 text-wrapper">
+          <span class="font_1 text_2">Title 01</span>
+        </div>
+      </div>
+      <div class="flex-row flex-auto group_2">
+        <canvas class="flex-auto image_3" id="waterfall"></canvas>
+        <div class="flex-col shrink-0 group_3">
+          <div class="flex-col section_2 space-y-24">
+            <div class="flex-row items-center">
+              <span class="font_2 text_3">Exposure Time</span>
+              <div class="flex-col justify-start items-end text-wrapper_2 input">
+                <span class="font_3 text_4">0.0096</span>
+              </div>
+            </div>
+            <div class="flex-row items-center space-x-170">
+              <span class="font_2">Spectro</span>
+              <div class="flex-col justify-start items-end shrink-0 input"><span class="font_3 text_5">0</span></div>
+            </div>
+          </div>
+          <div class="flex-col section_3 space-y-28">
+            <span class="self-start font_1 text_6">Title 02</span>
+            <div class="flex-col space-y-24">
+              <div class="flex-row items-center space-x-128">
+                <span class="font_3">Pixel Number</span>
+                <div class="flex-col justify-start items-end shrink-0 text-wrapper_3">
+                  <span class="font_3 text_7 text_8">2048</span>
+                </div>
+              </div>
+              <div class="flex-row items-center space-x-172">
+                <span class="font_3">PCB SN</span>
+                <div class="flex-col justify-start items-end shrink-0 text-wrapper_3">
+                  <span class="font_3 text_7 text_9">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex-col section_3 space-y-28">
+            <span class="self-start font_1 text_6">Title 03</span>
+            <div class="flex-col">
+              <div class="flex-col justify-start items-center button"><span class="font_1">Start</span></div>
+              <div class="flex-row items-center group_4 space-x-22">
+                <span class="font_2">Laser Power ( V )</span>
+                <div class="flex-row items-center shrink-0 group_5 space-x-24">
+                  <div class="flex-col justify-start shrink-0 relative group_6">
+                    <div class="divider"></div>
+                    <div class="section_4 pos"></div>
+                  </div>
+                  <span class="font_3 text_7">1.0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="section_5"></div>
+        </div>
+      </div>
+    </div>
 
-    <body>
-        <canvas id="waterfall"></canvas>
-        <script src="colormap.js"></script>
-        <script src="spectrum.js"></script>
-        <script src="script.js"></script>
-    </body>
+    <script src="spectrum.js"></script>
+    <script src="main.js"></script>
+  </body>
 </html>

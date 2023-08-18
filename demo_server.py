@@ -79,7 +79,8 @@ def get_spectrum_data():
     for i, one_index in enumerate( peak_indices.tolist()):
         left_index = one_index - peak_span if one_index - peak_span >= 0 else 0
         right_index = one_index + peak_span if one_index + peak_span < 4096 else 4096
-        data[ left_index: right_index ] = peak_values[i]
+        data[left_index: one_index] = np.linspace(int(0.2*peak_values[i]), peak_values[i], one_index - left_index)
+        data[one_index: right_index] = np.linspace(peak_values[i] , int(0.2*peak_values[i]), right_index - one_index)
 
     # Assign the peak values to the corresponding indices in the data array
     
