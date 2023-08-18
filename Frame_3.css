@@ -1,5 +1,5 @@
 .page {
-  background-color: #ffffff;
+  background-color: #222222;
   width: 100%;
   overflow-y: auto;
   overflow-x: hidden;
@@ -12,7 +12,7 @@
   padding: 0.63rem 1.5rem;
   background-color: #222222;
   height: 4rem;
-  border-right: solid 0.063rem #ffffff1a;
+  border-right: solid 0.063rem #9f9e9e1a;
 }
 .font_1 {
   font-size: 1rem;

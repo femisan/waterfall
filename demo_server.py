@@ -62,6 +62,10 @@ def index():
 def static(filename):
     return static_file(filename, root='.')
 
+@app.route('/imgs/<filename:re:.*\.png>')
+def send_image(filename):
+    return static_file(filename, root='imgs', mimetype='image/png')
+
 def get_spectrum_data():
     # data = np.zeros(4096)
     data = np.random.randint(low=1000, high=2000, size=4096)
