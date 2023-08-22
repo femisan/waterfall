@@ -63,6 +63,19 @@ function main() {
     window.addEventListener("keydown", function (e) {
         spectrum.onKeypress(e);
     });
+
+    // Add click event listener to the toggle button
+    const toggleButton = document.querySelector('.gg-display-flex');
+    const group3 = document.querySelector('.group_3');
+
+    // Add click event listener to the toggle button
+    toggleButton.addEventListener('click', function() {
+        if (group3.style.display === 'none') {
+            group3.style.display = ''; // Reset to default
+        } else {
+            group3.style.display = 'none'; // Hide the element
+        }
+    });
 }
 
 window.onload = main;
