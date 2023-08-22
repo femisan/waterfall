@@ -48,7 +48,7 @@ def handle_websocket():
 
 @app.route('/')
 def index():
-    return static_file('index.html', root='.')
+    return static_file('root.html', root='.')
 
 
 @app.route('/<filename>')
