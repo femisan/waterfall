@@ -58,21 +58,18 @@
           <div class="flex-col section_control space-y-28">
             <span class="self-start font_1 text_6">Title 03</span>
             <div class="flex-col">
-              <button class="flex-col justify-start items-center button" >
-                Start
-              </button>
-              <div class="flex-row items-center group_4 space-x-22 justify-between">
-                <span class="font_2">Laser Power ( V )</span>
-                <div class="flex-row items-center shrink-0 group_5 space-x-24">
-                  <div class="flex-col justify-start shrink-0 relative group_6">
-                    <div class="divider"></div>
-                    <div class="section_4 pos"></div>
-                  </div>
-                  <span class="font_3 text_7">1.0</span>
+                <button id="start_btn" class="flex-col justify-start items-center button">Start</button>
+                <div class="flex-row items-center group_4 space-x-22 justify-between">
+                    <span class="font_2">Laser Power ( V )</span>
+                    <div class="flex-row items-center shrink-0 group_5 space-x-24">
+                        <!-- Slider input added below -->
+                        <input type="range" id="laserPowerSlider" min="0" max="2.5" step="0.02" value="1.0" class="section_4">
+                        <!-- Display the current value of the slider -->
+                        <span id="laserPowerValue" class="font_3 text_7">1.0</span>
+                    </div>
                 </div>
-              </div>
             </div>
-          </div>
+        </div>
 
           <div class="section_5"></div>
         </div>

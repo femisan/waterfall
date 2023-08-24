@@ -1,5 +1,6 @@
 'use strict';
 
+var ws = new WebSocket("ws://" + window.location.host + "/websocket");
 function strTo16BitArray(hexStr) {
     hexStr = hexStr.toUpperCase().replace(/[^0-9A-F]/g, '');
     if (hexStr.length % 4 !== 0) {
@@ -17,7 +18,7 @@ function strTo16BitArray(hexStr) {
 }
 
 function connectWebSocket(spectrum) {
-    var ws = new WebSocket("ws://" + window.location.host + "/websocket");
+    
     ws.onopen = function(evt) {
         console.log("connected!");
     }
@@ -49,6 +50,50 @@ function connectWebSocket(spectrum) {
     }
 }
 
+function sendCommand(cmd) {
+	var data = {};
+	data["id"] = "cmd";
+    data["cmd"] = cmd;
+	var json_data = JSON.stringify(data);
+	console.log('send json_data to server: ', data);
+	ws.send(json_data);
+}
+
+function hideSidebarEvent() {
+    const toggleButton = document.querySelector('.gg-display-flex');
+    const group3 = document.querySelector('.group_3');
+    
+    // Add click event listener to the toggle button
+    toggleButton.addEventListener('click', function() {
+        if (group3.style.display === 'none') {
+            group3.style.display = ''; // Reset to default
+        } else {
+            group3.style.display = 'none'; // Hide the element
+        }
+    });
+}
+
+function startBtnEvent() {
+    document.getElementById('start_btn').addEventListener('click', function() {
+        console.log('startBtn clicked');
+        sendCommand('start');
+    });
+}
+
+function laserSliderEvent() {
+    const laserPowerSlider = document.getElementById('laserPowerSlider');
+    const laserPowerValue = document.getElementById('laserPowerValue');
+    
+    laserPowerSlider.addEventListener('change', function() {
+        // Display the current value
+        laserPowerValue.textContent = laserPowerSlider.value;
+        // convert Voltage to DAC value
+        let dacValue = Math.round(laserPowerSlider.value * 256 / 3.3);
+        dacValue = dacValue > 192 ? 192 : dacValue;
+        sendCommand(`o ${dacValue}`);
+    });
+}
+
 function main() {
     // Create spectrum object on canvas with ID "waterfall"
     var spectrum = new Spectrum(
@@ -64,18 +109,9 @@ function main() {
         spectrum.onKeypress(e);
     });
 
-    // Add click event listener to the toggle button
-    const toggleButton = document.querySelector('.gg-display-flex');
-    const group3 = document.querySelector('.group_3');
-
-    // Add click event listener to the toggle button
-    toggleButton.addEventListener('click', function() {
-        if (group3.style.display === 'none') {
-            group3.style.display = ''; // Reset to default
-        } else {
-            group3.style.display = 'none'; // Hide the element
-        }
-    });
+    hideSidebarEvent();
+    startBtnEvent();
+    laserSliderEvent();
 }
 
 window.onload = main;

@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-# Copyright (c) 2019 Jeppe Ledet-Pedersen
-# This software is released under the MIT license.
-# See the LICENSE file for further details.
 
 import sys
 import json
@@ -13,9 +10,6 @@ import threading
 import json
 from time import sleep
 
-# from gnuradio import gr
-# from gnuradio import uhd
-# from gnuradio.fft import logpwrfft
 
 import numpy as np
 
@@ -38,15 +32,13 @@ def handle_websocket():
         abort(400, 'Expected WebSocket request.')
 
     connections.add(wsock)
-   
-    # Send center frequency and span
-    wsock.send(json.dumps(opts))
-    tb = SenderThread()
-    tb.start()
-    print('start thread to send')
+    wsock.send(json.dumps(opts))  # Send center frequency and span
+
     while True:
         try:
-            wsock.receive()
+            message = wsock.receive()
+            if message:
+                print(f"Received message: {message}")
         except WebSocketError:
             break
 
@@ -65,6 +57,24 @@ def static(filename):
 @app.route('/imgs/<filename:re:.*\.png>')
 def send_image(filename):
     return static_file(filename, root='imgs', mimetype='image/png')
+
+
+def broadcast_data():
+    while True:
+        data = get_spectrum_data()
+        payload = json.dumps({'s': data.tolist()}, separators=(',', ':'))
+        disconnected_clients = set()
+
+        for client in connections:
+            try:
+                client.send(payload)
+            except Exception:
+                disconnected_clients.add(client)
+
+        for client in disconnected_clients:
+            connections.remove(client)
+
+        sleep(0.2)
 
 def get_spectrum_data():
     # data = np.zeros(4096)
@@ -90,34 +100,13 @@ def get_spectrum_data():
     
     return data
 
-
 class SenderThread(threading.Thread):
     def __init__(self):
-        threading.Thread.__init__(self)
-        # self.connections = connections
-        self.p = get_spectrum_data()
-        # self.connection = ws_conn
-        self.stop_event = threading.Event()  # Flag to stop the thread when needed
+        super(SenderThread, self).__init__(daemon=True)
 
-    def start(self):
-        # This method will be called when the thread starts
-        # while not self.stop_event.is_set():
-        print('start sending data')
-        for c in connections:
-            try:
-                while True:
-                    self.p = get_spectrum_data()
-                    payload = json.dumps({'s': self.p.tolist()}, separators=(',', ':'))
-                    # print('ws payload type', type(payload))
-                    c.send(payload)
-                    sleep(0.2)
-            except Exception:
-                connections.remove(c)
-
-    def stop(self):
-        # Method to stop the thread
-        self.stop_event.set()
-
+    # define the function to run in the thread
+    def run(self):
+        broadcast_data()
 
 
 def main():
@@ -130,6 +119,9 @@ def main():
     opts['center'] = args.frequency
     opts['span'] = args.sample_rate
 
+    tb = SenderThread()
+    tb.start()  # Start the thread only once
+
     server = WSGIServer(("0.0.0.0", 8000), app, handler_class=WebSocketHandler)
     print('serving at port', 8000)
     
@@ -137,8 +129,6 @@ def main():
         server.serve_forever()
     except Exception:
         sys.exit(0)
-
-
 
 if __name__ == '__main__':
     main()
