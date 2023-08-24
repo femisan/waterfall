@@ -61,16 +61,20 @@ function sendCommand(cmd) {
 
 function hideSidebarEvent() {
     const toggleButton = document.querySelector('.gg-display-flex');
-    const group3 = document.querySelector('.group_3');
+    const drawer = document.querySelector('.group_3');
     
     // Add click event listener to the toggle button
     toggleButton.addEventListener('click', function() {
-        if (group3.style.display === 'none') {
-            group3.style.display = ''; // Reset to default
-        } else {
-            group3.style.display = 'none'; // Hide the element
-        }
+        console.log('toggleButton clicked','style.display',drawer.style.display,'classList',drawer.classList);
+        if (drawer.style.display === 'none' || !drawer.classList.contains('visible')) {
+            drawer.style.display = 'block';
+            drawer.classList.add('visible');
+          } else {
+            drawer.style.display = 'none';
+            drawer.classList.remove('visible');
+          }
     });
+  
 }
 
 function startBtnEvent() {

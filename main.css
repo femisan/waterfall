@@ -68,7 +68,7 @@
   background-color: #222222;
   width: 100%;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto;
   height: 100%;
 }
 .header {
@@ -121,9 +121,18 @@
   height: 46rem;
 }
 .group_3 {
+  display: block;
   width: 25rem;
   transition: opacity 0.5s; /* 这将使opacity属性有0.5秒的渐变效果 */
   opacity: 1; /* 初始的不透明度 */
+}
+@media (max-width: 768px) {
+  .group_3 {
+    display: none !important;
+  }
+  .group_3.visible {
+    display: block !important;
+  }
 }
 .section_2 {
   padding: 0.19rem 1.5rem 1.56rem;
