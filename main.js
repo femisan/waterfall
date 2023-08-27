@@ -59,6 +59,31 @@ function sendCommand(cmd) {
 	ws.send(json_data);
 }
 
+function writeOneReg(reg_addr, reg_value) {
+    let sendStr = `w ${reg_addr}:${reg_value}`;
+    sendCommand(sendStr);
+}
+
+function uint32_to_MSB_LSB(value) {
+    let LSB = value & 0xFF;
+    let MSB = (value >> 8) & 0xFF;
+    return [MSB, LSB];
+}
+
+function setExposureTime(exp_time_ms) {
+    // real exp time will be 200ns * (48+SENSOR_EXP_TIME)
+    // if ms smaller than 0.0108 ms, return 0.0108 ms
+    exp_time_ms = exp_time_ms < 0.0108 ? 0.0108 : exp_time_ms;
+
+    let exp_time_ns = Math.floor((exp_time_ms * 1.0e6 / 200) - 48);
+    // exp_time_ns should not smaller than 6, if smaller than 6, set to 6 and return ms value 
+    console.log('setExposureTime', exp_time_ms, exp_time_ns);
+    let [EXP_TIME_MSB, EXP_TIME_LSB] = uint32_to_MSB_LSB(exp_time_ns);
+    writeOneReg(9, EXP_TIME_LSB);
+    writeOneReg(10, EXP_TIME_MSB);
+    return exp_time_ms;
+}
+
 // function hideSidebarEvent() {
 //     const toggleButton = document.getElementById('fullscreen_toggle');
 //     const drawer = document.querySelector('.group_3');
@@ -91,17 +116,17 @@ function hideSidebarEvent() {
             drawer.style.display = 'block';
             drawer.classList.add('visible');
             
-            // Set the toggleButton class to gg-maximize-alt as drawer is visible
-            toggleButton.classList.remove('gg-minimize-alt');
-            toggleButton.classList.add('gg-maximize-alt');
+            // // Set the toggleButton class to gg-maximize-alt as drawer is visible
+            // toggleButton.classList.remove('gg-minimize-alt');
+            // toggleButton.classList.add('gg-maximize-alt');
         } else {
             // If drawer is visible, hide it
             drawer.style.display = 'none';
             drawer.classList.remove('visible');
             
             // Set the toggleButton class to gg-minimize-alt as drawer is hidden
-            toggleButton.classList.remove('gg-maximize-alt');
-            toggleButton.classList.add('gg-minimize-alt');
+            // toggleButton.classList.remove('gg-maximize-alt');
+            // toggleButton.classList.add('gg-minimize-alt');
         }
     });
 }
@@ -117,12 +142,12 @@ function pauseToggleEvent(spectrum) {
         spectrum.togglePaused();
 
         // Toggle the icon class
-        if (pauseToggle.classList.contains('gg-play-pause')) {
-            pauseToggle.classList.remove('gg-play-pause');
-            pauseToggle.classList.add('gg-play-button');
+        if (pauseToggle.classList.contains('gg-play-pause-r')) {
+            pauseToggle.classList.remove('gg-play-pause-r');
+            pauseToggle.classList.add('gg-play-button-r');
         } else {
-            pauseToggle.classList.remove('gg-play-button');
-            pauseToggle.classList.add('gg-play-pause');
+            pauseToggle.classList.remove('gg-play-button-r');
+            pauseToggle.classList.add('gg-play-pause-r');
         }
     });
 }
@@ -149,23 +174,40 @@ function laserSliderEvent() {
     });
 }
 
+function exposureTimeEvent(){
+
+    const inputElement = document.getElementById('input_expotime');
+
+   
+    inputElement.addEventListener('change', function() {
+        // 获取输入值, ms float
+        const value = parseFloat(inputElement.value);
+        
+        // 检查value是否是有效的数字
+        if (!isNaN(value)) {
+            console.log('set sepcturm average value', value);// 调用spectrum对象的setAveraging方法
+            inputElement.value = setExposureTime(value)
+        }
+    });
+}
+
 function averageInputEnvet(spectrum) {
    
-        const inputElement = document.getElementById('input_average');
-    
-        // 添加输入事件监听器
-        inputElement.addEventListener('input', function() {
-            // 获取输入值
-            const value = parseInt(inputElement.value, 10);
-            
-            // 检查value是否是有效的数字
-            if (!isNaN(value)) {
-                console.log('set sepcturm average value', value);
-                // 调用spectrum对象的setAveraging方法
-                spectrum.setAveraging(value);
-            }
-        });
-    }
+    const inputElement = document.getElementById('input_average');
+
+    // 添加输入事件监听器
+    inputElement.addEventListener('change', function() {
+        // 获取输入值
+        const value = parseInt(inputElement.value, 10);
+        
+        // 检查value是否是有效的数字
+        if (!isNaN(value)) {
+            console.log('set sepcturm average value', value);
+            // 调用spectrum对象的setAveraging方法
+            spectrum.setAveraging(value);
+        }
+    });
+}
 
 function main() {
     // Create spectrum object on canvas with ID "waterfall"
@@ -188,6 +230,7 @@ function main() {
     hideSidebarEvent();
     // startBtnEvent();
     laserSliderEvent();
+    exposureTimeEvent();
 }
 
 window.onload = main;

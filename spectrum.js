@@ -154,8 +154,8 @@ Spectrum.prototype.updateAxes = function() {
 
     this.ctx_axes.textAlign = "left";
     var step = 10;
-    var step_db =  Math.floor((this.max_db - this.min_db)/step);
-    for (var i = this.min_db; i <= this.max_db; i += step_db) {
+    var step_db =  Math.floor((this.max_db - this.min_db) / step);
+    for (var i = this.min_db + step_db; i < this.max_db; i += step_db) {  // Adjust the start and end conditions
         var y = height - this.squeeze(i, 0, height);
         this.ctx_axes.fillText(i, 5, y);
 
@@ -197,6 +197,7 @@ Spectrum.prototype.updateAxes = function() {
         this.ctx_axes.stroke();
     }
 }
+
 
 Spectrum.prototype.addData = function(data) {
     if (!this.paused) {
