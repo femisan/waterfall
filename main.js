@@ -231,6 +231,9 @@ function main() {
     // startBtnEvent();
     laserSliderEvent();
     exposureTimeEvent();
+    document.getElementById('btn_download').addEventListener('click', function() {
+        spectrum.downloadCSV();
+    });
 }
 
 window.onload = main;

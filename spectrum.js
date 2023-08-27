@@ -16,6 +16,9 @@ var binary = [[255, 255, 255], [254, 254, 254], [253, 253, 253], [252, 252, 252]
 var colormaps = [turbo, fosphor, viridis, inferno, magma, jet, binary];
 
 
+Spectrum.prototype.dataHistory = [];
+Spectrum.prototype.maxStoreLen = 1000;
+
 Spectrum.prototype.squeeze = function(value, out_min, out_max) {
     if (value <= this.min_db)
         return out_min;
@@ -199,6 +202,10 @@ Spectrum.prototype.updateAxes = function() {
 }
 
 
+Spectrum.prototype.setMaxStoreLen = function(maxStoreLen) {
+    this.maxStoreLen = maxStoreLen;
+}
+
 Spectrum.prototype.addData = function(data) {
     if (!this.paused) {
         if (data.length != this.wf_size) {
@@ -211,7 +218,36 @@ Spectrum.prototype.addData = function(data) {
         this.drawSpectrum(data);
         this.addWaterfallRow(data);
         this.resize();
+
+        this.dataHistory.push({
+            timestamp: Date.now(), // current UNIX timestamp in milliseconds
+            data: data
+        });
+        if (this.dataHistory.length > this.maxStoreLen) {
+            this.dataHistory.shift(); // remove the oldest entry if more than 50 entries
+        }
     }
+}
+
+Spectrum.prototype.downloadCSV = function() {
+    // Sort dataHistory based on timestamp
+    this.dataHistory.sort((a, b) => a.timestamp - b.timestamp);
+    
+    // Convert dataHistory to CSV format
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Timestamp,Data\n"; // headers
+    this.dataHistory.forEach(entry => {
+        csvContent += `${entry.timestamp},${entry.data.join(",")}\n`; // data rows
+    });
+
+    // Trigger CSV download
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "data.csv");
+    document.body.appendChild(link); // Required for Firefox
+    link.click();
+    document.body.removeChild(link);
 }
 
 Spectrum.prototype.updateSpectrumRatio = function() {
