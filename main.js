@@ -59,23 +59,74 @@ function sendCommand(cmd) {
 	ws.send(json_data);
 }
 
+// function hideSidebarEvent() {
+//     const toggleButton = document.getElementById('fullscreen_toggle');
+//     const drawer = document.querySelector('.group_3');
+    
+//     // Add click event listener to the toggle button
+//     toggleButton.addEventListener('click', function() {
+//         console.log('toggleButton clicked','style.display',drawer.style.display,'classList',drawer.classList);
+//         if (drawer.style.display === 'none' || !drawer.classList.contains('visible')) {
+//             drawer.style.display = 'block';
+//             drawer.classList.add('visible');
+//           } else {
+//             drawer.style.display = 'none';
+//             drawer.classList.remove('visible');
+//           }
+//     });
+  
+// }
+
 function hideSidebarEvent() {
-    const toggleButton = document.querySelector('.gg-display-flex');
+    const toggleButton = document.getElementById('fullscreen_toggle');
     const drawer = document.querySelector('.group_3');
     
     // Add click event listener to the toggle button
     toggleButton.addEventListener('click', function() {
-        console.log('toggleButton clicked','style.display',drawer.style.display,'classList',drawer.classList);
+        console.log('toggleButton clicked', 'style.display', drawer.style.display, 'classList', drawer.classList);
+        
+        // Check the current state of the drawer
         if (drawer.style.display === 'none' || !drawer.classList.contains('visible')) {
+            // If drawer is hidden, display it
             drawer.style.display = 'block';
             drawer.classList.add('visible');
-          } else {
+            
+            // Set the toggleButton class to gg-maximize-alt as drawer is visible
+            toggleButton.classList.remove('gg-minimize-alt');
+            toggleButton.classList.add('gg-maximize-alt');
+        } else {
+            // If drawer is visible, hide it
             drawer.style.display = 'none';
             drawer.classList.remove('visible');
-          }
+            
+            // Set the toggleButton class to gg-minimize-alt as drawer is hidden
+            toggleButton.classList.remove('gg-maximize-alt');
+            toggleButton.classList.add('gg-minimize-alt');
+        }
     });
-  
 }
+
+
+
+function pauseToggleEvent(spectrum) {
+    const pauseToggle = document.getElementById('pause_toggle');
+    pauseToggle.addEventListener('click', function() {
+        console.log('pauseToggle clicked', pauseToggle.checked);
+        
+        // Toggle paused state
+        spectrum.togglePaused();
+
+        // Toggle the icon class
+        if (pauseToggle.classList.contains('gg-play-pause')) {
+            pauseToggle.classList.remove('gg-play-pause');
+            pauseToggle.classList.add('gg-play-button');
+        } else {
+            pauseToggle.classList.remove('gg-play-button');
+            pauseToggle.classList.add('gg-play-pause');
+        }
+    });
+}
+
 
 function startBtnEvent() {
     document.getElementById('start_btn').addEventListener('click', function() {
@@ -98,6 +149,24 @@ function laserSliderEvent() {
     });
 }
 
+function averageInputEnvet(spectrum) {
+   
+        const inputElement = document.getElementById('input_average');
+    
+        // 添加输入事件监听器
+        inputElement.addEventListener('input', function() {
+            // 获取输入值
+            const value = parseInt(inputElement.value, 10);
+            
+            // 检查value是否是有效的数字
+            if (!isNaN(value)) {
+                console.log('set sepcturm average value', value);
+                // 调用spectrum对象的setAveraging方法
+                spectrum.setAveraging(value);
+            }
+        });
+    }
+
 function main() {
     // Create spectrum object on canvas with ID "waterfall"
     var spectrum = new Spectrum(
@@ -113,8 +182,11 @@ function main() {
         spectrum.onKeypress(e);
     });
 
+    pauseToggleEvent(spectrum);
+    averageInputEnvet(spectrum);
+
     hideSidebarEvent();
-    startBtnEvent();
+    // startBtnEvent();
     laserSliderEvent();
 }
 

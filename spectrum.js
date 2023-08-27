@@ -385,7 +385,7 @@ Spectrum.prototype.onKeypress = function(e) {
         this.decrementSpectrumPercent();
     } else if (e.key == "+") {
         this.incrementAveraging();
-    } else if (e.key == "-") {
+    } else if (e.key == "-") { 
         this.decrementAveraging();
     } else if (e.key == "m") {
         this.toggleMaxHold();

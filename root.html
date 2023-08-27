@@ -13,10 +13,10 @@
       <div class="flex-col flex-auto">
         <div class="flex-row header">
           <div class="flex-row justify-between items-center flex-auto section">
-            <span class="font_1 text">Title 01</span>
+            <span class="font_1 text">Raman</span>
             <div class="flex-row items-center group space-x-21">
-              <i class="gg-play-button"></i>
-              <i class="gg-display-flex"></i>
+              <i id="pause_toggle" class=" gg-play-pause"></i>
+              <i id="fullscreen_toggle" class="gg-maximize-alt" ></i>
             </div>
           </div>
         </div>
@@ -26,19 +26,19 @@
         <div class="flex-col shrink group_3">
           
           <div class="flex-col section_control space-y-24">
-            <span class="self-start font_1 text_6">Title 01</span>
+            <span class="self-start font_1 text_6">Sepctrum Setting</span>
             <div class="flex-row items-center justify-between">
               <span class="font_2 text_3">Exposure Time</span>
               <input type="number" class="flex-col justify-start items-end text-wrapper_2 input" value="0.0096" >
             </div>
-            <div class="flex-row items-center space-x-170 justify-between">
-              <span class="font_2">Spectro</span>
-              <input type="number" class="flex-col justify-start items-end shrink-0 input" value="0"/>
+            <div class="flex-row items-center justify-between">
+              <span class="font_2">Average Numbers</span>
+              <input id="input_average" type="number" class="input" value="0"/>
             </div>
           </div>
 
           <div class="flex-col section_control space-y-28">
-            <span class="self-start font_1 text_6">Title 02</span>
+            <span class="self-start font_1 text_6">Device Info</span>
             <div class="flex-col space-y-24">
               <div class="flex-row items-center justify-between">
                 <span class="font_3">Pixel Number</span>
@@ -56,16 +56,17 @@
           </div>
 
           <div class="flex-col section_control space-y-28">
-            <span class="self-start font_1 text_6">Title 03</span>
+            <span class="self-start font_1 text_6">Laser Setting</span>
             <div class="flex-col">
-                <button id="start_btn" class="flex-col justify-start items-center button">Start</button>
-                <div class="flex-row items-center group_4 space-x-22 justify-between">
+                <!-- <button id="start_btn" class="flex-col justify-start items-center button">Start</button> -->
+                <div class="flex-row items-center group_4  justify-between">
                     <span class="font_2">Laser Power ( V )</span>
-                    <div class="flex-row items-center shrink-0 group_5 space-x-24">
+                    <div class="flex-row items-center shrink-0 justify-end">
                         <!-- Slider input added below -->
+                        <span id="laserPowerValue" class="font_3 text_7">1.0</span>
                         <input type="range" id="laserPowerSlider" min="0" max="2.5" step="0.02" value="1.0" class="section_4">
                         <!-- Display the current value of the slider -->
-                        <span id="laserPowerValue" class="font_3 text_7">1.0</span>
+                        
                     </div>
                 </div>
             </div>
