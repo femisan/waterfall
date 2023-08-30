@@ -169,30 +169,64 @@ Spectrum.prototype.updateAxes = function() {
         this.ctx_axes.stroke();
     }
 
+    // this.ctx_axes.textBaseline = "bottom";
+    // for (var i = 0; i < 11; i++) {
+    //     var x = Math.round(width / 10) * i;
+
+    //     if (this.spanHz > 0) {
+    //         var adjust = 0;
+    //         if (i == 0) {
+    //             this.ctx_axes.textAlign = "left";
+    //             adjust = 3;
+    //         } else if (i == 10) {
+    //             this.ctx_axes.textAlign = "right";
+    //             adjust = -3;
+    //         } else {
+    //             this.ctx_axes.textAlign = "center";
+    //         }
+
+    //         var freq = this.centerHz + this.spanHz / 10 * (i - 5);
+    //         if (this.centerHz + this.spanHz > 1e6)
+    //             freq = freq / 1e6 + "M";
+    //         else if (this.centerHz + this.spanHz > 1e3)
+    //             freq = freq / 1e3 + "k";
+    //         this.ctx_axes.fillText(freq, x + adjust, height - 3);
+    //     }
+
+    //     this.ctx_axes.beginPath();
+    //     this.ctx_axes.moveTo(x, 0);
+    //     this.ctx_axes.lineTo(x, height);
+    //     this.ctx_axes.strokeStyle = "rgba(200, 200, 200, 0.10)";
+    //     this.ctx_axes.stroke();
+    // }
     this.ctx_axes.textBaseline = "bottom";
-    for (var i = 0; i < 11; i++) {
-        var x = Math.round(width / 10) * i;
 
-        if (this.spanHz > 0) {
-            var adjust = 0;
-            if (i == 0) {
-                this.ctx_axes.textAlign = "left";
-                adjust = 3;
-            } else if (i == 10) {
-                this.ctx_axes.textAlign = "right";
-                adjust = -3;
-            } else {
-                this.ctx_axes.textAlign = "center";
-            }
-
-            var freq = this.centerHz + this.spanHz / 10 * (i - 5);
-            if (this.centerHz + this.spanHz > 1e6)
-                freq = freq / 1e6 + "M";
-            else if (this.centerHz + this.spanHz > 1e3)
-                freq = freq / 1e3 + "k";
-            this.ctx_axes.fillText(freq, x + adjust, height - 3);
+    var stepNum = 5;
+    var start_wavelength = 400;
+    var end_wavelength = 1000;
+    var step = (end_wavelength - start_wavelength) / stepNum;
+    
+    for (var i = 0; i <= stepNum; i++) {
+        // Modify this line to evenly distribute the steps based on the canvas width
+        var x = Math.round(width / stepNum) * i;
+    
+        // Adjust the text alignment based on the position
+        var adjust = 0;
+        if (i == 0) {
+            this.ctx_axes.textAlign = "left";
+            adjust = 3;
+        } else if (i == stepNum) {
+            this.ctx_axes.textAlign = "right";
+            adjust = -3;
+        } else {
+            this.ctx_axes.textAlign = "center";
         }
-
+    
+        // Calculate the wavelength for the current step and display it
+        var wavelength = start_wavelength + step * i;
+        this.ctx_axes.fillText(wavelength + "nm", x + adjust, height - 3);
+    
+        // Drawing the vertical line
         this.ctx_axes.beginPath();
         this.ctx_axes.moveTo(x, 0);
         this.ctx_axes.lineTo(x, height);
@@ -215,6 +249,18 @@ Spectrum.prototype.addData = function(data) {
             this.ctx_wf.fillRect(0, 0, this.wf.width, this.wf.height);
             this.imagedata = this.ctx_wf.createImageData(data.length, 1);
         }
+        // find min and max value of data
+        var min = data[0];
+        var max = data[0];
+        for (var i = 0; i < data.length; i++) {
+            if (data[i] < min)
+                min = data[i];
+            if (data[i] > max)
+                max = data[i];
+        }
+        min = Math.floor(min * 0.8)
+        max = Math.ceil(max * 1.2)
+        this.setRange(min,max)
         this.drawSpectrum(data);
         this.addWaterfallRow(data);
         this.resize();
@@ -401,6 +447,73 @@ Spectrum.prototype.toggleFullscreen = function() {
     }
 }
 
+// Drawing the clipping box
+Spectrum.prototype.drawClippingBox = function() {
+    this.ctx.strokeStyle = 'red';
+    this.ctx.lineWidth = 2;
+    this.ctx.strokeRect(this.clipStart, 0, this.clipEnd - this.clipStart, this.canvas.height);
+};
+
+// Initializing the clipping box
+Spectrum.prototype.initClippingBox = function() {
+    this.clipStart = this.canvas.width * 0.25;
+    this.clipEnd = this.canvas.width * 0.75;
+    this.drawClippingBox();
+};
+
+// Stretch the content within the clipping box
+Spectrum.prototype.stretchContent = function() {
+    const clipWidth = this.clipEnd - this.clipStart;
+    const imageData = this.ctx.getImageData(this.clipStart, 0, clipWidth, this.canvas.height);
+
+    // Create a temporary canvas
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCanvas.width = clipWidth;
+    tempCanvas.height = this.canvas.height;
+
+    // Put the image data onto the temporary canvas
+    tempCtx.putImageData(imageData, 0, 0);
+
+    // Clear the main canvas
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // Draw the content of the temporary canvas onto the main canvas, stretching it
+    this.ctx.drawImage(tempCanvas, 0, 0, clipWidth, this.canvas.height, 0, 0, this.canvas.width, this.canvas.height);
+};
+
+
+// Adding necessary event listeners for interaction
+Spectrum.prototype.addEventListeners = function() {
+    this.canvas.addEventListener('mousedown', (e) => {
+        const mouseX = e.offsetX;
+        if (mouseX > this.clipStart - 10 && mouseX < this.clipStart + 10) {
+            this.isDragging = 'start';
+        } else if (mouseX > this.clipEnd - 10 && mouseX < this.clipEnd + 10) {
+            this.isDragging = 'end';
+        }
+    });
+
+    this.canvas.addEventListener('mousemove', (e) => {
+        if (this.isDragging) {
+            const mouseX = e.offsetX;
+            if (this.isDragging === 'start') {
+                this.clipStart = mouseX;
+            } else if (this.isDragging === 'end') {
+                this.clipEnd = mouseX;
+            }
+            this.drawClippingBox();
+        }
+    });
+
+    this.canvas.addEventListener('mouseup', () => {
+        if (this.isDragging) {
+            this.isDragging = false;
+            this.stretchContent();
+        }
+    });
+};
+
 Spectrum.prototype.onKeypress = function(e) {
     if (e.key == " ") {
         this.togglePaused();
@@ -470,6 +583,11 @@ function Spectrum(id, options) {
     this.wf.height = this.wf_rows;
     this.wf.width = this.wf_size;
     this.ctx_wf = this.wf.getContext("2d");
+
+    this.clipStart = null;
+    this.clipEnd = null;
+    this.isDragging = false;
+    this.addEventListeners();
 
     // Trigger first render
     this.setAveraging(this.averaging);

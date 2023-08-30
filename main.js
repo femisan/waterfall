@@ -234,6 +234,10 @@ function main() {
     document.getElementById('btn_download').addEventListener('click', function() {
         spectrum.downloadCSV();
     });
+
+    // document.getElementById('btn_clip')?.addEventListener('click', function() {
+    //     spectrum.initClippingBox();
+    // });
 }
 
 window.onload = main;
