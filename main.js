@@ -199,6 +199,7 @@ function exposureTimeEvent(){
         // 获取输入值, ms float
         localStorage.setItem("input_expotime_value", inputElement.value);
         // 检查value是否是有效的数字
+        const value = parseFloat(inputElement.value);
         if (!isNaN(value)) {
             console.log('set sepcturm average value', value);// 调用spectrum对象的setAveraging方法
             setExposureTime(inputElement.value);
