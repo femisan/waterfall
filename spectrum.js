@@ -18,6 +18,8 @@ var colormaps = [turbo, fosphor, viridis, inferno, magma, jet, binary];
 
 Spectrum.prototype.dataHistory = [];
 Spectrum.prototype.maxStoreLen = 1000;
+Spectrum.prototype.recordAvgFinishCb = null;
+Spectrum.prototype.maxAvgRecord = 30;
 
 Spectrum.prototype.squeeze = function(value, out_min, out_max) {
     if (value <= this.min_db)
@@ -242,6 +244,13 @@ Spectrum.prototype.setMaxStoreLen = function(maxStoreLen) {
 
 Spectrum.prototype.addData = function(data) {
     if (!this.paused) {
+
+        const dark_spectrum = localStorage.getItem("dark_spectrum")? JSON.parse(localStorage.getItem("dark_spectrum")) : null;
+        if (dark_spectrum && dark_spectrum.length > 0  && dark_spectrum.length == data.length) {
+            const diff = data.map((item, index) => item - dark_spectrum[index]);
+            data = diff;
+        }
+
         if (data.length != this.wf_size) {
             this.wf_size = data.length;
             this.ctx_wf.canvas.width = data.length;
@@ -265,15 +274,58 @@ Spectrum.prototype.addData = function(data) {
         this.addWaterfallRow(data);
         this.resize();
 
+       
         this.dataHistory.push({
             timestamp: Date.now(), // current UNIX timestamp in milliseconds
             data: data
         });
+        if (this.recordAvgFinishCb && this.dataHistory.length >= this.maxAvgRecord) {
+            const calculateAverage = this.calculateAverage(this.dataHistory);
+            localStorage.setItem("dark_spectrum", JSON.stringify(calculateAverage));
+            this.recordAvgFinishCb(calculateAverage);
+            this.recordAvgFinishCb = null;
+            this.dataHistory=[];
+            // this.dataHistory.push({
+            //     timestamp: Date.now(), // current UNIX timestamp in milliseconds
+            //     data: calculateAverage
+            // });
+        }
         if (this.dataHistory.length > this.maxStoreLen) {
-            this.dataHistory.shift(); // remove the oldest entry if more than 50 entries
+            this.dataHistory.shift(); // remove the oldest entry if more than maxStoreLen
         }
     }
 }
+
+Spectrum.prototype.recordAvg = function(cb) {
+    this.recordAvgFinishCb = cb;
+}
+
+Spectrum.prototype.calculateAverage = function(dataHistory) {
+    const arrLen = dataHistory[0].data.length;
+    let averageData = Array(arrLen).fill(0);
+    
+    dataHistory.forEach(item => {
+        for (let i = 0; i < arrLen; i++) {
+            averageData[i] += item.data[i];
+        }
+    });
+    
+    for (let i = 0; i < arrLen; i++) {
+        averageData[i] = averageData[i] / dataHistory.length;
+    }
+
+    return averageData;
+};
+
+Spectrum.prototype.resetAll = function() {
+    localStorage.setItem("dark_spectrum", '');
+    this.recordAvgFinishCb = null;
+    this.dataHistory = [];
+    this.ctx_wf.fillStyle = "black";
+    this.ctx_wf.fillRect(0, 0, this.wf.width, this.wf.height);
+    this.imagedata = this.ctx_wf.createImageData(this.wf_size, 1);
+}
+
 
 Spectrum.prototype.downloadCSV = function() {
     // Sort dataHistory based on timestamp
@@ -282,6 +334,10 @@ Spectrum.prototype.downloadCSV = function() {
     // Convert dataHistory to CSV format
     let csvContent = "data:text/csv;charset=utf-8,";
     csvContent += "Timestamp,Data\n"; // headers
+    const dark_spectrum = localStorage.getItem("dark_spectrum")? JSON.parse(localStorage.getItem("dark_spectrum")) : null;
+    if (dark_spectrum && dark_spectrum.length > 0) {
+        csvContent += `#dark spectrum,${dark_spectrum.join(",")}\n`;
+    }
     this.dataHistory.forEach(entry => {
         csvContent += `${entry.timestamp},${entry.data.join(",")}\n`; // data rows
     });

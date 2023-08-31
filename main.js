@@ -21,6 +21,7 @@ function connectWebSocket(spectrum) {
     
     ws.onopen = function(evt) {
         console.log("connected!");
+        afterConnected();
     }
     ws.onclose = function(evt) {
         console.log("closed");
@@ -70,9 +71,10 @@ function uint32_to_MSB_LSB(value) {
     return [MSB, LSB];
 }
 
-function setExposureTime(exp_time_ms) {
+function setExposureTime(exp_time_ms_text) {
     // real exp time will be 200ns * (48+SENSOR_EXP_TIME)
     // if ms smaller than 0.0108 ms, return 0.0108 ms
+    let exp_time_ms = parseFloat(exp_time_ms_text);
     exp_time_ms = exp_time_ms < 0.0108 ? 0.0108 : exp_time_ms;
 
     let exp_time_ns = Math.floor((exp_time_ms * 1.0e6 / 200) - 48);
@@ -174,19 +176,32 @@ function laserSliderEvent() {
     });
 }
 
+function afterConnected(){
+    const expoTime = localStorage.getItem("input_expotime_value");
+    if(expoTime){
+        setExposureTime(expoTime);
+    }
+    // set laser power to 0 every time connected
+    sendCommand(`o 0`);
+}
+
 function exposureTimeEvent(){
 
     const inputElement = document.getElementById('input_expotime');
 
+    if(localStorage.getItem("input_expotime_value")) {
+        console.log('input_expotime_value', localStorage.getItem("input_expotime_value"));
+        inputElement.value = localStorage.getItem("input_expotime_value");
+    }
+
    
     inputElement.addEventListener('change', function() {
         // 获取输入值, ms float
-        const value = parseFloat(inputElement.value);
-        
+        localStorage.setItem("input_expotime_value", inputElement.value);
         // 检查value是否是有效的数字
         if (!isNaN(value)) {
             console.log('set sepcturm average value', value);// 调用spectrum对象的setAveraging方法
-            inputElement.value = setExposureTime(value)
+            setExposureTime(inputElement.value);
         }
     });
 }
@@ -209,6 +224,22 @@ function averageInputEnvet(spectrum) {
     });
 }
 
+function recordDarkSpecturmEvent(spectrum) {
+    const darkBtn = document.getElementById('btn_record_dark');
+    darkBtn.addEventListener('click', function() {
+        console.log('btn_dark clicked');
+        spectrum.resetAll()
+        console.log('spectrum data length', spectrum.dataHistory.length);
+        // forbid to set laser slider and set laser power to 0
+        sendCommand(`o 0`);
+       
+        spectrum.recordAvg((avg_data)=>{
+            console.log('avg_data', avg_data);
+            alert('dark spectrum recorded for 100 times, please click "OK" to continue');
+        })
+    });
+}
+
 function main() {
     // Create spectrum object on canvas with ID "waterfall"
     var spectrum = new Spectrum(
@@ -226,6 +257,7 @@ function main() {
 
     pauseToggleEvent(spectrum);
     averageInputEnvet(spectrum);
+    recordDarkSpecturmEvent(spectrum);
 
     hideSidebarEvent();
     // startBtnEvent();
@@ -241,3 +273,4 @@ function main() {
 }
 
 window.onload = main;
+
