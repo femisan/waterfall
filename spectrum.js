@@ -19,7 +19,7 @@ var colormaps = [turbo, fosphor, viridis, inferno, magma, jet, binary];
 Spectrum.prototype.dataHistory = [];
 Spectrum.prototype.maxStoreLen = 1000;
 Spectrum.prototype.recordAvgFinishCb = null;
-Spectrum.prototype.maxAvgRecord = 30;
+Spectrum.prototype.maxAvgRecord = 1;
 
 Spectrum.prototype.squeeze = function(value, out_min, out_max) {
     if (value <= this.min_db)

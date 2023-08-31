@@ -180,6 +180,7 @@ function afterConnected(){
     const expoTime = localStorage.getItem("input_expotime_value");
     if(expoTime){
         setExposureTime(expoTime);
+        console.log('stored expotime', expoTime)
     }
     // set laser power to 0 every time connected
     sendCommand(`o 0`);
@@ -236,7 +237,7 @@ function recordDarkSpecturmEvent(spectrum) {
        
         spectrum.recordAvg((avg_data)=>{
             console.log('avg_data', avg_data);
-            alert('dark spectrum recorded for 100 times, please click "OK" to continue');
+            alert('dark spectrum recorded, please click "OK" to continue');
         })
     });
 }
