@@ -76,23 +76,23 @@ def broadcast_data():
 
         sleep(0.2)
 
-def get_spectrum_data():
-    # data = np.zeros(4096)
-    data = np.random.randint(low=1000, high=2000, size=4096)
+def get_spectrum_data(pixel_width=4096):
+
+    data = np.random.randint(low=1000, high=2000, size=pixel_width)
 
     # Set the number of peaks
     num_peaks = 4
     peak_span = 30
 
     # Generate random indices for the peaks
-    peak_indices = np.random.randint(0, 4096, num_peaks)
+    peak_indices = np.random.randint(0, pixel_width, num_peaks)
 
     # Generate random peak values in the range [300, 65535]
     peak_values = np.random.randint(10000, 40000, num_peaks)
 
     for i, one_index in enumerate( peak_indices.tolist()):
         left_index = one_index - peak_span if one_index - peak_span >= 0 else 0
-        right_index = one_index + peak_span if one_index + peak_span < 4096 else 4096
+        right_index = one_index + peak_span if one_index + peak_span < pixel_width else pixel_width
         data[left_index: one_index] = np.linspace(int(0.2*peak_values[i]), peak_values[i], one_index - left_index)
         data[one_index: right_index] = np.linspace(peak_values[i] , int(0.2*peak_values[i]), right_index - one_index)
 

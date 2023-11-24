@@ -36,9 +36,14 @@ function connectWebSocket(spectrum) {
         // console.log(evt);
         var data = JSON.parse(evt.data);
         if (data.s) {
+            updatePixelSize(data.s.length);
+            // console.log('spectrum data size', data.s.length)
             spectrum.addData(data.s);
         }else if(data.hex){
-            spectrum.addData(strTo16BitArray(data.hex));
+            var hexArray = strTo16BitArray(data.hex);
+            // console.log('hexArray size', hexArray.length)
+            updatePixelSize(hexArray.length);
+            spectrum.addData(hexArray);
         }
          else {
             if (data.center) {
@@ -242,11 +247,19 @@ function recordDarkSpecturmEvent(spectrum) {
     });
 }
 
+
+function updatePixelSize(pixel_size) {
+    var pixel_size_el = document.getElementById('pixel_size');
+    if(pixel_size_el){
+        pixel_size_el.innerText = pixel_size.toString();
+    }
+}
+
 function main() {
     // Create spectrum object on canvas with ID "waterfall"
     var spectrum = new Spectrum(
         "waterfall", {
-            spectrumPercent: 70
+            spectrumPercent: 85
     });
 
     // Connect to websocket

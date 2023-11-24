@@ -138,8 +138,8 @@ Spectrum.prototype.drawSpectrum = function(bins) {
     this.ctx.restore();
 
     // Fill scaled path
-    this.ctx.fillStyle = this.gradient;
-    this.ctx.fill();
+    // this.ctx.fillStyle = this.gradient;
+    // this.ctx.fill();
 
     // Copy axes from offscreen canvas
     this.ctx.drawImage(this.ctx_axes.canvas, 0, 0);
@@ -204,9 +204,19 @@ Spectrum.prototype.updateAxes = function() {
     this.ctx_axes.textBaseline = "bottom";
 
     var stepNum = 5;
-    var start_wavelength = 400;
-    var end_wavelength = 1000;
+    var start_wavelength = 0;
+    var end_wavelength = this.wf_size;
     var step = (end_wavelength - start_wavelength) / stepNum;
+
+    const pixel2WaveLength = ( pixel_num) => {
+        const b0 = +4.2937514E+02;
+        const b1 = +6.9907625E-01;
+        const b2 = +5.0587893E-05;
+        const b3 = -4.1475293E-08;
+        const b4 = -1.8769910E-11;
+        var wavelength = b0 + b1 * pixel_num + b2 * Math.pow(pixel_num, 2) + b3 * Math.pow(pixel_num, 3) + b4 * Math.pow(pixel_num, 4);
+        return wavelength;
+    }
     
     for (var i = 0; i <= stepNum; i++) {
         // Modify this line to evenly distribute the steps based on the canvas width
@@ -225,8 +235,11 @@ Spectrum.prototype.updateAxes = function() {
         }
     
         // Calculate the wavelength for the current step and display it
-        var wavelength = start_wavelength + step * i;
-        this.ctx_axes.fillText(wavelength + "nm", x + adjust, height - 3);
+        var wavelength = pixel2WaveLength(start_wavelength + step * i);
+        var waveNumber = Math.floor(10000000/this.laserWavelength - 10000000/wavelength);
+        // var xaxis_text = (i%2 ==0)? waveNumber + "cm-1" : waveNumber;
+        var xaxis_text = i==0? waveNumber + "cm-1" : waveNumber ;
+        this.ctx_axes.fillText(xaxis_text, x + adjust, height - 3);
     
         // Drawing the vertical line
         this.ctx_axes.beginPath();
@@ -604,10 +617,11 @@ function Spectrum(id, options) {
     this.spanHz = (options && options.spanHz) ? options.spanHz : 0;
     this.wf_size = (options && options.wf_size) ? options.wf_size : 0;
     this.wf_rows = (options && options.wf_rows) ? options.wf_rows : 2048;
-    this.spectrumPercent = (options && options.spectrumPercent) ? options.spectrumPercent : 25;
+    this.spectrumPercent = (options && options.spectrumPercent) ? options.spectrumPercent : 15;
     this.spectrumPercentStep = (options && options.spectrumPercentStep) ? options.spectrumPercentStep : 5;
     this.averaging = (options && options.averaging) ? options.averaging : 0;
     this.maxHold = (options && options.maxHold) ? options.maxHold : false;
+    this.laserWavelength = (options && options.laserWavelength) ? options.laserWavelength : 785;
 
     // Setup state
     this.paused = false;
