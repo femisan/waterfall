@@ -19,7 +19,8 @@ var colormaps = [turbo, fosphor, viridis, inferno, magma, jet, binary];
 Spectrum.prototype.dataHistory = [];
 Spectrum.prototype.maxStoreLen = 1000;
 Spectrum.prototype.recordAvgFinishCb = null;
-Spectrum.prototype.maxAvgRecord = 1;
+Spectrum.prototype.maxDarkAvgRecord = 1;
+Spectrum.prototype.avgDataArrTemp = []; 
 
 Spectrum.prototype.squeeze = function(value, out_min, out_max) {
     if (value <= this.min_db)
@@ -90,18 +91,6 @@ Spectrum.prototype.drawSpectrum = function(bins) {
     // Fill with black
     this.ctx.fillStyle = "black";
     this.ctx.fillRect(0, 0, width, height);
-
-    // FFT averaging
-    if (this.averaging > 0) {
-        if (!this.binsAverage || this.binsAverage.length != bins.length) {
-            this.binsAverage = Array.from(bins);
-        } else {
-            for (var i = 0; i < bins.length; i++) {
-                this.binsAverage[i] += this.alpha * (bins[i] - this.binsAverage[i]);
-            }
-        }
-        bins = this.binsAverage;
-    }
 
     // Max hold
     if (this.maxHold) {
@@ -263,6 +252,18 @@ Spectrum.prototype.addData = function(data) {
             const diff = data.map((item, index) => item - dark_spectrum[index]);
             data = diff;
         }
+        // if  averaging is enabled,  push data to avgDataArrTemp, else just start drawing
+        if (this.averaging > 1 ) {
+            if(this.avgDataArrTemp.length < this.averaging){
+                this.avgDataArrTemp.push(data);
+                return;
+            }else{
+                // when avgDataArrTemp is full, calculate the average and draw the spectrum
+                const avgData = this.avgDataArrTemp.reduce((acc, val) => acc.map((item, index) => item + val[index]));
+                data = avgData.map(item => item/this.averaging);
+                this.avgDataArrTemp = [];
+            }
+        }
 
         if (data.length != this.wf_size) {
             this.wf_size = data.length;
@@ -292,7 +293,9 @@ Spectrum.prototype.addData = function(data) {
             timestamp: Date.now(), // current UNIX timestamp in milliseconds
             data: data
         });
-        if (this.recordAvgFinishCb && this.dataHistory.length >= this.maxAvgRecord) {
+        // this part is for recording dark spectrum
+        if (this.recordAvgFinishCb && this.dataHistory.length >= this.maxDarkAvgRecord) {
+            console.log('eventering recordAvgFinishCb')
             const calculateAverage = this.calculateAverage(this.dataHistory);
             localStorage.setItem("dark_spectrum", JSON.stringify(calculateAverage));
             this.recordAvgFinishCb(calculateAverage);
@@ -457,9 +460,12 @@ Spectrum.prototype.setSpanHz = function(hz) {
 }
 
 Spectrum.prototype.setAveraging = function(num) {
-    if (num >= 0) {
+    if (num >= 1) {
         this.averaging = num;
         this.alpha = 2 / (this.averaging + 1)
+    }else{
+        this.averaging = 1;
+    
     }
 }
 
@@ -619,7 +625,7 @@ function Spectrum(id, options) {
     this.wf_rows = (options && options.wf_rows) ? options.wf_rows : 2048;
     this.spectrumPercent = (options && options.spectrumPercent) ? options.spectrumPercent : 15;
     this.spectrumPercentStep = (options && options.spectrumPercentStep) ? options.spectrumPercentStep : 5;
-    this.averaging = (options && options.averaging) ? options.averaging : 0;
+    this.averaging = (options && options.averaging) ? options.averaging : 1;
     this.maxHold = (options && options.maxHold) ? options.maxHold : false;
     this.laserWavelength = (options && options.laserWavelength) ? options.laserWavelength : 785;
 
